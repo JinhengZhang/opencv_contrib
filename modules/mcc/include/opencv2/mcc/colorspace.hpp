@@ -4,9 +4,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "opencv2/ccm/io.hpp"
-#include "opencv2/ccm/operations.hpp"
-#include "opencv2/ccm/utils.hpp"
+#include "io.hpp"
+#include "D:\OpenCV\opencv_contrib\opencv_contrib\modules\mcc\include\opencv2\mcc\operations.hpp"
 
 namespace cv {
 	namespace ccm {
@@ -21,18 +20,23 @@ namespace cv {
 			Operations from;
 			ColorSpace* l = 0;
 			ColorSpace* nl = 0;
+			/*std::shared_ptr<ColorSpace> l;
+			std::shared_ptr<ColorSpace> nl;*/
 
 			ColorSpace() {};
 
 			ColorSpace(IO io, std::string type, bool linear) :io(io), type(type), linear(linear) {};
 
-			virtual ~ColorSpace() {};
+			virtual ~ColorSpace() {
+				l = 0;
+				nl = 0;
+			};
 
-			virtual bool relate(const ColorSpace& other) {
+			virtual bool relate(const ColorSpace& other)const {
 				return (type == other.type) && (io == other.io);
 			};
 
-			virtual Operations relation(const ColorSpace& other) { 
+			virtual Operations relation(const ColorSpace& other) const{ 
 				return IDENTITY_OPS;
 			};
 
@@ -65,7 +69,7 @@ namespace cv {
                1. Same type, same linear; - copy
                2. Same type, different linear, self is nonlinear; - 2 toL
                3. Same type, different linear, self is linear - 3 fromL*/
-			virtual Operations relation(const ColorSpace& other) {
+			virtual Operations relation(const ColorSpace& other)const {
 				if (linear == other.linear) { return IDENTITY_OPS; }
 				if (linear) { return Operations({ Operation(fromL) }); }
 				return Operations({ Operation(toL) });
@@ -82,9 +86,13 @@ namespace cv {
 			void bind(RGB_Base_& rgbl) {
 				init();
 				rgbl.init();
+				/*l .reset(&rgbl);
+				rgbl.l.reset(&rgbl);
+				nl.reset(this);
+				rgbl.nl.reset(this);*/
 				l = &rgbl;
 				rgbl.l = &rgbl;
-				nl = this;
+				nl=this;
 				rgbl.nl = this;
 			}
 
@@ -469,8 +477,8 @@ namespace cv {
 
 		};
 
-		Lab Lab_D65_2(D65_2);
-		Lab Lab_D50_2(D50_2);
+		const Lab Lab_D65_2(D65_2);
+		const Lab Lab_D50_2(D50_2);
 
 	}
 }

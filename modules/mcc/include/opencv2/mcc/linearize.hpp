@@ -1,7 +1,7 @@
 #ifndef __OPENCV_MCC_LINEARIZE_HPP__
 #define __OPENCV_MCC_LINEARIZE_HPP__
 
-#include "opencv2/ccm/color.hpp"
+#include "D:\OpenCV\opencv_contrib\opencv_contrib\modules\mcc\include\opencv2\mcc\color.hpp"
 
 namespace cv {
     namespace ccm {
@@ -179,28 +179,29 @@ namespace cv {
         };
 
         /* get linearization method */
-        Linear* get_linear(double gamma, int deg, cv::Mat src, Color dst, cv::Mat mask, RGB_Base_ cs, LINEAR_TYPE linear_type) // TODO ����ָ��
+        std::shared_ptr<Linear>  get_linear(double gamma, int deg, cv::Mat src, Color dst, cv::Mat mask, RGB_Base_ cs, LINEAR_TYPE linear_type) // TODO ����ָ��
         {
-            Linear* p = new Linear(); // todo ��ʼ��ΪNULL����nullptr,����ָ��
+           // Linear* p = new Linear(); // todo ��ʼ��ΪNULL����nullptr,����ָ��
+            std::shared_ptr<Linear> p=std::make_shared<Linear>();
             switch (linear_type)
             {
             case cv::ccm::IDENTITY_:
-                p = new Linear_identity();
+                p.reset(new Linear_identity());
                 break;
             case cv::ccm::GAMMA:
-                p = new Linear_gamma(gamma);
+                p.reset( new Linear_gamma(gamma));
                 break;
             case cv::ccm::COLORPOLYFIT:
-                p = new Linear_color<Polyfit>(deg, src, dst, mask, cs);
+                p.reset(new Linear_color<Polyfit>(deg, src, dst, mask, cs));
                 break;
             case cv::ccm::COLORLOGPOLYFIT:
-                p = new Linear_color<LogPolyfit>(deg, src, dst, mask, cs);
+                p.reset( new Linear_color<LogPolyfit>(deg, src, dst, mask, cs));
                 break;
             case cv::ccm::GRAYPOLYFIT:
-                p = new Linear_gray<Polyfit>(deg, src, dst, mask, cs);
+                p.reset(new Linear_gray<Polyfit>(deg, src, dst, mask, cs));
                 break;
             case cv::ccm::GRAYLOGPOLYFIT:
-                p = new Linear_gray<LogPolyfit>(deg, src, dst, mask, cs);
+                p.reset(new Linear_gray<LogPolyfit>(deg, src, dst, mask, cs));
                 break;
             default:
                 throw std::invalid_argument { "Wrong linear_type!" };
