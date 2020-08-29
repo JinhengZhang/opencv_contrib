@@ -38,6 +38,11 @@ namespace cv
 {
 namespace ccm 
 
+
+/* *\ brief function for elementWise operation
+   *\ param src the input Matrix
+   *\ lambda the function for operation 
+*/
 template<typename F>
 cv::Mat elementWise(const cv::Mat& src, F&& lambda) 
 {
@@ -73,6 +78,10 @@ cv::Mat elementWise(const cv::Mat& src, F&& lambda)
     return dst;
 }
 
+/* *\ brief function for channel operation
+   *\ param src the input Matrix
+   *\ lambda the function for operation 
+*/
 template<typename F>
 cv::Mat channelWise(const cv::Mat& src, F&& lambda) 
 {
@@ -85,6 +94,11 @@ cv::Mat channelWise(const cv::Mat& src, F&& lambda)
     return dst;
 }
 
+/* *\ brief function for distance operation
+   *\ param src the input Matrix
+   *\ param ref another input Matrix
+   *\ lambda the computing method for distance 
+*/
 template<typename F>
 cv::Mat distanceWise(cv::Mat& src, cv::Mat& ref, F&& lambda) 
 {
