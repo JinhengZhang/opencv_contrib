@@ -38,11 +38,11 @@ namespace cv
 {
 namespace ccm 
 {
-
+ /* *\ brief Io is the meaning of  illuminant and observer. See notes of ccm.hpp for supported list for  illuminant and observer*/
 class IO
 {
 public:
-    /* io: illuminant & observer */
+   
     std::string illuminant;
     std::string observer;
 
@@ -87,6 +87,7 @@ std::vector<double> xyY2XYZ(const std::vector<double>& xyY)
     return { Y * xyY[0] / xyY[1], Y, Y / xyY[1] * (1 - xyY[0] - xyY[1]) };
 }
 
+/* *\ brief function to get illuminants*/
 static std::map <IO, std::vector<double>> getIlluminant() 
 {
     std::map <IO, std::vector<double>>  illuminants;
