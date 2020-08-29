@@ -40,6 +40,9 @@ namespace ccm
 
 typedef std::function<cv::Mat(cv::Mat)> MatFunc;
 
+/* brief Operation class contains some operarions used for color space
+ *       conversion containing linear transformation and non-linear transformation
+ */
 class Operation 
 {
 public:
@@ -54,7 +57,7 @@ public:
     Operation(MatFunc f) : linear(false), f(f) {};
 
     virtual ~Operation() {};
-
+    /**\brief operator function will run operation*/
     cv::Mat operator()(cv::Mat& abc) 
     {
         if (!linear) 
@@ -68,7 +71,8 @@ public:
         return multiple(abc, M);
     };
 
-    void add(Operation& other) 
+    /**\brief add function will conbine this operation with  other  linear transformation operation*/
+    void add(const Operation& other) 
     {
         if (M.empty()) 
         {
@@ -99,12 +103,14 @@ public:
 
     virtual ~Operations() {};
 
+    /**\brief add function will conbine this operation with  other  transformation operations*/
     Operations& add(const Operations& other) 
     {
         ops.insert(ops.end(), other.ops.begin(), other.ops.end());
         return *this;
     };
 
+    /**\brief run operations to make color conversion*/
     cv::Mat run(cv::Mat abc) 
     {
         Operation hd;
