@@ -34,13 +34,13 @@
 #include <string>
 #include <iostream>
 
-namespace cv 
+namespace cv
 {
-namespace ccm 
+namespace ccm
 {
 
 template<typename F>
-cv::Mat elementWise(const cv::Mat& src, F&& lambda) 
+cv::Mat elementWise(const cv::Mat& src, F&& lambda)
 {
     cv::Mat dst = src.clone();
     const int channel = src.channels();
@@ -60,7 +60,7 @@ cv::Mat elementWise(const cv::Mat& src, F&& lambda)
         cv::MatIterator_<cv::Vec3d> it, end;
         for (it = dst.begin<cv::Vec3d>(), end = dst.end<cv::Vec3d>(); it != end; ++it) 
         {
-            for (int j = 0; j < 3; j++) 
+            for (int j = 0; j < 3; j++)
             {
                 (*it)[j] = lambda((*it)[j]);
             }
