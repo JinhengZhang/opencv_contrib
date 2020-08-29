@@ -46,111 +46,6 @@ namespace ccm
 class Color 
 {
 public:
-<<<<<<< HEAD
-	cv::Mat colors;
-	const ColorSpace& cs;
-	cv::Mat grays;
-	cv::Mat colored;
-	std::map<ColorSpace, std::shared_ptr<Color>> history;
-
-	Color(cv::Mat colors, const ColorSpace& cs) :colors(colors), cs(cs) {};
-
-	virtual ~Color() {};
-
-	/* change to other color space; return Color;
-		The conversion process incorporates linear transformations to speed up.
-		method is chromatic adapation method;
-		when save if True, get data from history first; */
-	Color to(const ColorSpace& other, CAM method = BRADFORD, bool save = true) 
-	{
-		if (history.count(other) == 1) 
-		{
-
-			return *history[other];
-		}
-		if (cs.relate(other)) 
-		{
-			return Color(cs.relation(other).run(colors), other);
-		}
-		Operations ops;
-		ops.add(cs.to).add(XYZ(cs.io).cam(other.io, method)).add(other.from);
-		std::shared_ptr<Color> color(new Color(ops.run(colors), other));
-		if (save) 
-		{
-			history[other] = color;
-		}
-		return *color;
-	}
-
-	cv::Mat channel(cv::Mat m, int i) 
-	{
-		cv::Mat dchannels[3];
-		split(m, dchannels);
-		return dchannels[i];
-	}
-
-	cv::Mat toGray(IO io, CAM method = BRADFORD, bool save = true) 
-	{
-		XYZ xyz(io); 
-		return channel(this->to(xyz, method, save).colors, 1);
-	}
-
-	cv::Mat toLuminant(IO io, CAM method = BRADFORD, bool save = true) 
-	{
-		Lab lab(io);
-		return channel(this->to(lab, method, save).colors, 0);
-	}
-	/* return distance between self and other */
-	cv::Mat diff(Color& other, DISTANCE_TYPE method = CIE2000) 
-	{
-		return diff(other, cs.io, method);
-	}
-
-	/**\return distance between this and other */
-	cv::Mat diff(Color& other, IO io, DISTANCE_TYPE method = CIE2000) 
-	{
-		Lab lab(io);
-		switch (method)
-		{
-		case cv::ccm::CIE76:
-		case cv::ccm::CIE94_GRAPHIC_ARTS:
-		case cv::ccm::CIE94_TEXTILES:
-		case cv::ccm::CIE2000:
-		case cv::ccm::CMC_1TO1:
-		case cv::ccm::CMC_2TO1:
-			return distance(to(lab).colors, other.to(lab).colors, method);
-		case cv::ccm::RGB:
-			return distance(to(*cs.nl).colors, other.to(*cs.nl).colors, method);
-		case cv::ccm::RGBL:
-			return distance(to(*cs.l).colors, other.to(*cs.l).colors, method);
-		default:
-			throw std::invalid_argument { "Wrong method!" };
-			break;
-		}
-	}
-
-	/* calculate gray mask */
-	void getGray(double JDN = 2.0) 
-	{
-		cv::Mat lab = to(Lab_D65_2).colors;
-		cv::Mat gray(colors.size(), colors.type());
-		int fromto[] = { 0,0, -1,1, -1,2 };
-		mixChannels(&lab, 1, &gray, 1, fromto, 3);
-		cv::Mat d = distance(lab, gray, CIE2000);
-		this->grays = d < JDN;
-		this->colored = ~grays;
-	}
-
-	Color operator[](cv::Mat mask) 
-	{
-		return Color(maskCopyTo(colors, mask), cs);
-	}
-
-	Color operator=(Color inp) 
-	{
-		return inp;
-	}
-=======
     cv::Mat colors;
     const ColorSpace& cs;
     cv::Mat grays;
@@ -255,7 +150,6 @@ public:
     {
         return inp;
     }
->>>>>>> jinheng/dirty
 };
 
 
