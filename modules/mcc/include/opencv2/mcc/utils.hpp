@@ -186,9 +186,11 @@ cv::Mat multiple(const cv::Mat& xyz, const cv::Mat& ccm)
     return res;
 }
 
-/* *\ brief multiple the function used to get the mask of saturated colors.
+/* *\ brief multiple the function used to get the mask of saturated colors,
+            colors between low and up will be choosed.
    *\ param src the input array,type of cv::Mat.
-   *\ param low  the ccm matrix to make color correction 
+   *\ param low  the threshold to choose  saturated colors
+   *\ param up  the threshold to choose  saturated colors
 */
 cv::Mat saturate(cv::Mat& src, const double& low, const double& up) 
 {
@@ -211,7 +213,8 @@ cv::Mat saturate(cv::Mat& src, const double& low, const double& up)
 
 const static cv::Mat m_gray = (cv::Mat_<double>(3, 1) << 0.2126, 0.7152, 0.0722);
 
-/**\ brief rgb2gray it is an approximation grayscale function for relative RGB color space,see Miscellaneous.pdf for details;
+/**\ brief rgb2gray it is an approximation grayscale function for relative RGB color space,
+ *         see Miscellaneous.pdf for details;
   *\ param rgb the input array,type of cv::Mat.
  */
 cv::Mat rgb2gray(cv::Mat rgb) 
