@@ -43,34 +43,42 @@ namespace cv
 namespace ccm
 {
 
+/**\brief Enum of the possible types of ccm.
+  */
 enum CCM_TYPE
 {
     CCM_3x3,
     CCM_4x3
 };
 
+/**\brief Enum of the possible types of initial method.
+  */
 enum INITIAL_METHOD_TYPE
 {
     WHITE_BALANCE,
     LEAST_SQUARE
 };
 
-/* After being called, the method produce a ColorCorrectionModel instance for inference.*/
+
+/**\brief Core class of ccm model.
+  *       produce a ColorCorrectionModel instance for inference.
+  */
 class ColorCorrectionModel
 {
 public:
     // detected colors, the referenceand the RGB colorspace for conversion
     cv::Mat src;
     Color dst;
+    RGBBase_ &cs;
+
+    // ccm type and shape
     CCM_TYPE ccm_type;
     int shape;
 
-    // linear method
-    RGBBase_ &cs;
+    // linear method and distance
     std::shared_ptr<Linear> linear;
     DISTANCE_TYPE distance;
 
-    // weights
     cv::Mat weights;
     cv::Mat ccm;
     cv::Mat ccm0;
@@ -90,7 +98,7 @@ public:
         this->dst = this->dst[mask];
         dst_rgbl = maskCopyTo(this->dst.to(*(this->cs.l)).colors, mask);
 
-        // empty for CCM_3x3, not empty for CCM_4x3
+        // make no change for CCM_3x3, nake change for CCM_4x3
         src_rgbl = prepare(src_rgbl);
 
         // distance function may affect the loss function and the fitting function
@@ -118,8 +126,10 @@ public:
         fitting();
     }
 
-    // make no change for ColorCorrectionModel_3x3 class
-    // convert matrix A to [A, 1] in ColorCorrectionModel_4x3 class
+    /**\brief Make no change for CCM_3x3.
+      *       convert matrix A to [A, 1] in CCM_4x3.
+      *\return output cv::Mat.
+      */
     cv::Mat prepare(const cv::Mat &inp)
     {
         switch (ccm_type)
@@ -143,9 +153,10 @@ public:
         }
     };
 
-    // fitting nonlinear - optimization initial value by white balance :
-    // res = diag(mean(s_r) / mean(d_r), mean(s_g) / mean(d_g), mean(s_b) / mean(d_b))
-    // see CCM.pdf for details;
+    /**\brief Fitting nonlinear - optimization initial value by white balance.
+      *       see CCM.pdf for details.
+      *\return cv::Mat.
+      */
     cv::Mat initialWhiteBalance(void)
     {
         cv::Mat schannels[3];
@@ -160,11 +171,10 @@ public:
         return initial_white_balance;
     };
 
-    // fitting nonlinear-optimization initial value by least square:
-    // res = np.linalg.lstsq(src_rgbl, dst_rgbl)
-    // see CCM.pdf for details;
-    // if fit==True, return optimalization for rgbl distance function;
-
+    /**\brief Fitting nonlinear-optimization initial value by least square.
+      *       see CCM.pdf for details
+      *       if fit==True, return optimalization for rgbl distance function.
+      */
     void initialLeastSquare(bool fit = false)
     {
         cv::Mat A, B, w;
@@ -173,7 +183,6 @@ public:
             A = src_rgbl;
             B = dst_rgbl;
         }
-
         else
         {
             pow(weights, 0.5, w);
@@ -182,7 +191,6 @@ public:
             A = w_.mul(src_rgbl);
             B = w_.mul(dst_rgbl);
         }
-
         solve(A.reshape(1, A.rows), B.reshape(1, B.rows), ccm0, DECOMP_SVD);
 
         if (fit)
@@ -195,17 +203,24 @@ public:
         }
     };
 
+    /**\brief Loss function base on cv::MinProblemSolver::Function.
+      *       see details in https://github.com/opencv/opencv/blob/master/modules/core/include/opencv2/core/optim.hpp
+      */
     class LossFunction : public cv::MinProblemSolver::Function
     {
     public:
         ColorCorrectionModel *ccm_loss;
         LossFunction(ColorCorrectionModel *ccm) : ccm_loss(ccm){};
 
+        /**\brief Reset dims to ccm->shape.
+          */
         int getDims() const
         {
             return ccm_loss->shape;
         }
 
+        /**\brief Reset calculation.
+          */
         double calc(const double *x) const
         {
             cv::Mat ccm(ccm_loss->shape, 1, CV_64F);
@@ -227,7 +242,10 @@ public:
         }
     };
 
-    // fitting ccm if distance function is associated with CIE Lab color space
+    /**\brief Fitting ccm if distance function is associated with CIE Lab color space.
+      *       see details in https://github.com/opencv/opencv/blob/master/modules/core/include/opencv2/core/optim.hpp
+      *       Set terminal criteria for solver is possible.
+      */
     void fitting(void)
     {
         cv::Ptr<DownhillSolver> solver = cv::DownhillSolver::create();
@@ -237,7 +255,7 @@ public:
         cv::Mat step = cv::Mat::ones(reshapeccm.size(), CV_64F);
         solver->setInitStep(step * 10);
         /* TermCriteria termcrit = TermCriteria(TermCriteria::MAX_ITER + TermCriteria::EPS, max_count, epsilon);
-    solver->setTermCriteria(termcrit);*/
+        solver->setTermCriteria(termcrit);*/
         double res = solver->minimize(reshapeccm);
         ccm = reshapeccm.reshape(0, shape);
         double loss = pow((res / masked_len), 0.5);
@@ -245,6 +263,8 @@ public:
         //std::cout << " loss " << loss << std::endl;
     };
 
+    /**\brief Infer using fitting ccm.
+      */
     cv::Mat infer(const cv::Mat &img, bool islinear = false)
     {
         if (!ccm.data)
@@ -262,8 +282,10 @@ public:
         return cs.fromL(img_ccm);
     };
 
-    // infer image and output as an BGR image with uint8 type
-    // mainly for test or debug!
+    /**\brief Infer image and output as an BGR image with uint8 type.
+      *       mainly for test or debug.
+      *       input size and output size should be 255.
+      */
     cv::Mat inferImage(std::string imgfile, bool islinear = false)
     {
         const int inp_size = 255;
@@ -292,7 +314,8 @@ private:
     cv::Mat src_rgbl;
     cv::Mat dst_rgbl;
 
-    // calculate weights and mask
+    /**\brief Calculate weights and mask.
+      */
     void calWeightsMasks(cv::Mat weights_list, double weights_coeff, cv::Mat saturate_mask)
     {
         // weights
@@ -325,5 +348,6 @@ private:
 
 } // namespace ccm
 } // namespace cv
+
 
 #endif
