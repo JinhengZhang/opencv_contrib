@@ -172,9 +172,7 @@ Supported Color Space:
 
 ## Explanation
 
--#  **Set header and namespaces**
-
-  @code{.cpp}
+ @code{.cpp}
 
 \#include <opencv2/core.hpp>
 
@@ -189,7 +187,7 @@ using namespace ccm;
   @endcode
 
 ```  
-If you want you can set the namespace like the code above.
+Here is sets of header and namespaces. You can set other namespace like the code above.
 ```
 
 @code{.cpp}
@@ -215,7 +213,7 @@ The Color Checker Matrix with the size of 24x1, type of cv::Mat.
  @endcode
 
 ```
-Some variables for computing ccm Matrix. The variable filename is the path of a picture to be corrected.
+Some variables for computing ccm Matrix. The variable filename is the path of a picture to be corrected.See other parameters' detail at the Parameters.
 ```
 
 @code{.cpp}
@@ -225,7 +223,7 @@ ColorCorrectionModel p1(s / 255, color, sRGB, CCM_3x3, CIE2000, GAMMA, 2.2, 3, s
  @endcode
 
 ```
-This the object of ColorCorrectionModel class. The parameters should be changed to get the best effect of color correction. See details at the Parameters
+the object p1 is an object of ColorCorrectionModel class. The parameters should be changed to get the best effect of color correction.
 ```
 
 @code{.cpp}
@@ -235,7 +233,7 @@ This the object of ColorCorrectionModel class. The parameters should be changed 
  @endcode
 
 ```
-The object p1 has the member variable ccm which means ccm matrix.Then, it will be used to make color correction
+The object p1 has the member variable ccm which means ccm matrix. Then, ccm matrix can be used to make color correction.
 ```
 
 @code{.cpp}
@@ -245,6 +243,6 @@ Mat img1 = p1.infer_image(filename);
  @endcode
 
 ```
-img1 is the result of correction correction.
+The object p1 has the member function infer_image to make correction correction using ccm matrix. Img1 is the result of correction correction.
 ```
 
