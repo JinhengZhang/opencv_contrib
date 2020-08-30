@@ -36,8 +36,8 @@ namespace cv
 namespace ccm 
 {
 
-/**\brief Enum of the possible types of linearization.
-  */
+/* *\ brief Enum of the possible types of linearization.
+*/
 enum LINEAR_TYPE 
 {
     IDENTITY_,
@@ -48,9 +48,8 @@ enum LINEAR_TYPE
     GRAYLOGPOLYFIT
 };
 
-/**\brief Polyfit model.
-  *       see Linearization.py for details.
-  */
+/* *\ brief Polyfit model.
+*/
 class Polyfit 
 {
 public:
@@ -59,8 +58,8 @@ public:
 
     Polyfit() {};
 
-    /**\brief Polyfit method.
-      */
+    /* *\ brief Polyfit method.
+    */
     Polyfit(cv::Mat s, cv::Mat d, int deg) :deg(deg) 
     {
         int npoints = s.checkVector(1);           
@@ -96,9 +95,8 @@ private:
     };
 };
 
-/**\brief Logpolyfit model.
-  *       see Linearization.py for details.
-  */
+/* *\ brief Logpolyfit model.
+*/
 class LogPolyfit 
 {
 public:
@@ -107,8 +105,8 @@ public:
 
     LogPolyfit() {};
 
-    /**\brief Logpolyfit method.
-      */
+    /* *\ brief Logpolyfit method.
+    */
     LogPolyfit(cv::Mat s, cv::Mat d, int deg) :deg(deg) 
     {
         cv::Mat mask_ = (s > 0) & (d > 0);
@@ -134,8 +132,8 @@ public:
     };
 };
 
-/**\brief Linearization base.
-  */
+/* *\ brief Linearization base.
+*/
 class Linear
 {
 public:
@@ -143,28 +141,27 @@ public:
 
     virtual ~Linear() {};
 
-    /**\brief Inference.
-      *\return cv::Mat.
-      */
+    /* *\ brief Inference.
+       *\ param inp the input array, type of cv::Mat.
+    */
     virtual cv::Mat linearize(cv::Mat inp) 
     { 
         return inp; 
     };
 
-    /**\brief Evaluate linearization model.
-      */
+    /* *\brief Evaluate linearization model.
+    */
     virtual void value(void) {};
 };
 
 
-/**\brief Linearization identity.
-  *       make no change.
-  */
+/* *\ brief Linearization identity.
+   *        make no change.
+*/
 class LinearIdentity : public Linear {};
 
-/**\brief Linearization gamma correction.
-  *       see Linearization.py for details.
-  */
+/* *\ brief Linearization gamma correction.
+*/
 class LinearGamma : public Linear
 {
 public:
@@ -178,10 +175,9 @@ public:
     };
 };
 
-/**\brief Linearization.
-  *       Grayscale polynomial fitting.
-  *       see Linearization.py for details.
-  */
+/* *\ brief Linearization.
+   *        Grayscale polynomial fitting.
+*/
 template <class T>
 class LinearGray :public Linear 
 {
@@ -200,8 +196,10 @@ public:
         calc(src, dst_);
     }
 
-    // monotonically increase is not guaranteed.
-    // see Linearization.py for details.
+    /* *\ brief monotonically increase is not guaranteed.
+       *\ param src the input array, type of cv::Mat.
+       *\ param dst the input array, type of cv::Mat.
+    */
     void calc(const cv::Mat& src, const cv::Mat& dst) 
     {
         p = T(src, dst, deg);
@@ -213,10 +211,9 @@ public:
     };
 };
 
-/**\brief Linearization.
-  *       Fitting channels respectively.
-  *       see Linearization.py for details.
-  */
+/* *\ brief Linearization.
+   *        Fitting channels respectively.
+*/
 template <class T>
 class LinearColor :public Linear 
 {
@@ -233,8 +230,6 @@ public:
         calc(src, dst_);
     }
 
-    // monotonically increase is not guaranteed.
-    // see Linearization.py for details.
     void calc(const cv::Mat& src, const cv::Mat& dst) 
     {
         cv::Mat schannels[3];
@@ -258,9 +253,16 @@ public:
 };
 
 
-/**\brief Get linearization method.
-  *       used in ccm model.
-  */
+/* *\ brief Get linearization method.
+   *        used in ccm model.
+   *\ param gamma used in LinearGamma.
+   *\ param deg degrees.
+   *\ param src the input array, type of cv::Mat.
+   *\ param dst the input array, type of cv::Mat.
+   *\ param mask the input array, type of cv::Mat.
+   *\ param cs type of RGBBase_.
+   *\ param linear_type type of linear.
+*/
 std::shared_ptr<Linear>  getLinear(double gamma, int deg, cv::Mat src, Color dst, cv::Mat mask, RGBBase_ cs, LINEAR_TYPE linear_type) 
 {
     std::shared_ptr<Linear> p = std::make_shared<Linear>();

@@ -39,17 +39,17 @@ namespace cv
 namespace ccm 
 {
 
-/**\brief Color defined by color_values and color space
-  */
+/* *\ brief Color defined by color_values and color space
+*/
 
 class Color 
 {
 public:
 
-    /**\param grays mask of grayscale color
-      *\param colored mask of colored color
-      *\param history storage of historical conversion
-      */
+    /* *\ param grays mask of grayscale color
+       *\ param colored mask of colored color
+       *\ param history storage of historical conversion
+    */
     cv::Mat colors;
     const ColorSpace& cs;
     cv::Mat grays;
@@ -60,12 +60,13 @@ public:
 
     virtual ~Color() {};
 
-    /**\brief Change to other color space.
-      *       The conversion process incorporates linear transformations to speed up.
-      *       method is chromatic adapation method.
-      *       when save if True, get data from history first.
-      *\return Color.
-      */
+    /* *\ brief Change to other color space.
+       *        The conversion process incorporates linear transformations to speed up.
+       *        method is chromatic adapation method.
+       *        when save if True, get data from history first.
+       *\ param other type of ColorSpace.
+       *\ return Color.
+    */
     Color to(const ColorSpace& other, CAM method = BRADFORD, bool save = true)
     {
         if (history.count(other) == 1)
@@ -87,9 +88,9 @@ public:
         return *color;
     }
 
-    /**\brief Channels split.
-      *\return each channel.
-      */
+    /* *\ brief Channels split.
+       *\ return each channel.
+    */
     cv::Mat channel(cv::Mat m, int i)
     {
         cv::Mat dchannels[3];
@@ -97,33 +98,38 @@ public:
         return dchannels[i];
     }
 
-    /**\brief To Gray.
-      */
+    /* *\ brief To Gray.
+    */
     cv::Mat toGray(IO io, CAM method = BRADFORD, bool save = true)
     {
         XYZ xyz(io); 
         return channel(this->to(xyz, method, save).colors, 1);
     }
 
-    /**\brief To Luminant.
-      */
+    /* *\ brief To Luminant.
+    */
     cv::Mat toLuminant(IO io, CAM method = BRADFORD, bool save = true)
     {
         Lab lab(io);
         return channel(this->to(lab, method, save).colors, 0);
     }
 
-    /**\brief Diff without IO.
-      *\return distance between self and other
-      */
+    /* *\ brief Diff without IO.
+       *\ param other type of Color.
+       *\ param method type of distance.
+       *\ return distance between self and other
+    */
     cv::Mat diff(Color& other, DISTANCE_TYPE method = CIE2000)
     {
         return diff(other, cs.io, method);
     }
 
-    /**\brief Diff with IO.
-      *\return distance between self and other
-      */
+    /* *\ brief Diff with IO.
+       *\ param other type of Color.
+       *\ param io type of IO.
+       *\ param method type of distance.
+       *\ return distance between self and other
+    */
     cv::Mat diff(Color& other, IO io, DISTANCE_TYPE method = CIE2000)
     {
         Lab lab(io);
@@ -146,8 +152,8 @@ public:
         }
     }
 
-    /**\brief Calculate gray mask.
-      */
+    /* *\ brief Calculate gray mask.
+    */
     void getGray(double JDN = 2.0)
     {
         cv::Mat lab = to(Lab_D65_2).colors;
@@ -159,8 +165,8 @@ public:
         this->colored = ~grays;
     }
 
-    /**\brief Operator for mask copy.
-      */
+    /* *\ brief Operator for mask copy.
+    */
     Color operator[](cv::Mat mask)
     {
         return Color(maskCopyTo(colors, mask), cs);
@@ -173,9 +179,9 @@ public:
 };
 
 
-/**\brief Data is from https://www.imatest.com/wp-content/uploads/2011/11/Lab-data-Iluminate-D65-D50-spectro.xls
-  *       see Miscellaneous.md for details.
-  */
+/* *\ brief Data is from https://www.imatest.com/wp-content/uploads/2011/11/Lab-data-Iluminate-D65-D50-spectro.xls
+   *        see Miscellaneous.md for details.
+*/
 const cv::Mat ColorChecker2005_LAB_D50_2 = (cv::Mat_<cv::Vec3d>(24, 1) <<
     cv::Vec3d(37.986, 13.555, 14.059),
     cv::Vec3d(65.711, 18.13, 17.81),
@@ -228,12 +234,12 @@ const cv::Mat ColorChecker2005_LAB_D65_2 = (cv::Mat_<cv::Vec3d>(24, 1) <<
     cv::Vec3d(35.68, -0.22, -1.205),
     cv::Vec3d(20.475, 0.049, -0.972));
 
-/**\brief  Macbeth ColorChecker with 2deg D50.
-  */
+/* *\ brief  Macbeth ColorChecker with 2deg D50.
+*/
 const Color Macbeth_D50_2(ColorChecker2005_LAB_D50_2, Lab_D50_2);
 
-/**\brief  Macbeth ColorChecker with 2deg D65.
-  */
+/* *\ brief  Macbeth ColorChecker with 2deg D65.
+*/
 const Color Macbeth_D65_2(ColorChecker2005_LAB_D65_2, Lab_D65_2);
 
 } // namespace ccm

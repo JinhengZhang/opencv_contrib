@@ -41,8 +41,8 @@ namespace cv
 namespace ccm 
 {
 
-/**\brief Basic class for ColorSpace.
-  */
+/* *\ brief Basic class for ColorSpace.
+*/
 class ColorSpace 
 {
 public:
@@ -80,14 +80,14 @@ public:
     }
 };
 
-/**\brief Base of RGB color space;
-  *       the argument values are from AdobeRGB;
-  *       Data from https://en.wikipedia.org/wiki/Adobe_RGB_color_space
-  */
+/* *\ brief Base of RGB color space;
+   *        the argument values are from AdobeRGB;
+   *        Data from https://en.wikipedia.org/wiki/Adobe_RGB_color_space
+*/
 class RGBBase_ : public ColorSpace 
 {
 public:
-    //primaries
+    // primaries
     double xr;
     double yr;
     double xg;
@@ -101,13 +101,14 @@ public:
 
     using ColorSpace::ColorSpace;
 
-    /**\brief There are 3 kinds of relationships for RGB:
-      *       1. Different types;    - no operation
-      *       1. Same type, same linear; - copy
-      *       2. Same type, different linear, self is nonlinear; - 2 toL
-      *       3. Same type, different linear, self is linear - 3 fromL
-      *\return Operations.
-      */
+    /* *\ brief There are 3 kinds of relationships for RGB:
+       *        1. Different types;    - no operation
+       *        1. Same type, same linear; - copy
+       *        2. Same type, different linear, self is nonlinear; - 2 toL
+       *        3. Same type, different linear, self is linear - 3 fromL
+       *\ param other type of ColorSpace.
+       *\ return Operations.
+    */
     virtual Operations relation(const ColorSpace& other) const
     {
         if (linear == other.linear) 
@@ -121,8 +122,8 @@ public:
         return Operations({ Operation(toL) });
     };
 
-    /**\brief Initial operations.
-      */
+    /* *\ brief Initial operations.
+    */
     void init() 
     {
         setParameter();
@@ -131,8 +132,9 @@ public:
         calOperations();
     }
 
-    /**\brief produce color space instance with linear and non-linear versions.
-      */
+    /* *\ brief Produce color space instance with linear and non-linear versions.
+       *\ param rgbl type of RGBBase_.
+    */
     void bind(RGBBase_& rgbl) 
     {
         init();
@@ -146,9 +148,9 @@ public:
 private:
     virtual void setParameter() {};
 
-    /**\brief calculation of M_RGBL2XYZ_base.
-      *       see ColorSpace.pdf for details.
-      */
+    /* *\ brief Calculation of M_RGBL2XYZ_base.
+       *        see ColorSpace.pdf for details.
+    */
     virtual void calM() 
     {
         cv::Mat XYZr, XYZg, XYZb, XYZ_rgbl, Srgb;
@@ -166,14 +168,14 @@ private:
         M_from = M_to.inv();
     };
 
-    /**\brief operations to or from XYZ.
-      */
+    /* *\ brief operations to or from XYZ.
+    */
     virtual void calOperations() 
     {
         // rgb -> rgbl
         toL = [this](cv::Mat rgb)->cv::Mat {return toLFunc(rgb); };
 
-        //  rgbl -> rgb
+        // rgbl -> rgb
         fromL = [this](cv::Mat rgbl)->cv::Mat {return fromLFunc(rgbl); };
 
         if (linear) 
@@ -202,8 +204,8 @@ private:
 
 };
 
-/**\brief Base of Adobe RGB color space;
-  */
+/* *\ brief Base of Adobe RGB color space;
+*/
 class AdobeRGBBase_ : public RGBBase_ 
 {
 public:
@@ -222,8 +224,8 @@ private:
     }
 };
 
-/**\brief Base of sRGB color space;
-  */
+/* *\ brief Base of sRGB color space;
+*/
 class sRGBBase_ : public RGBBase_ 
 {
 public:
@@ -236,9 +238,9 @@ public:
     double K0;
 
 private:
-    /**\brief linearization parameters
-      *       see ColorSpace.pdf for details;
-      */
+    /* *\ brief linearization parameters
+       *        see ColorSpace.pdf for details;
+    */
     virtual void calLinear() 
     {
         alpha = a + 1;
@@ -247,8 +249,8 @@ private:
         beta = K0 / phi;
     }
 
-    /**\brief Used by toLFunc.
-      */
+    /* *\ brief Used by toLFunc.
+    */
     double toLFuncEW(double& x) 
     {
         if (x > K0) 
@@ -265,17 +267,18 @@ private:
         }
     }
 
-    /**\brief Linearization.
-      *       see ColorSpace.pdf for details.
-      *\return cv::Mat.
-      */
+    /* *\ brief Linearization.
+       *        see ColorSpace.pdf for details.
+       *\ param rgb the input array, type of cv::Mat.
+       *\ return the output array, type of cv::Mat.
+    */
     cv::Mat toLFunc(cv::Mat& rgb) 
     {
         return elementWise(rgb, [this](double a)->double {return toLFuncEW(a); });
     }
 
-    /**\brief Used by fromLFunc.
-      */
+    /* *\ brief Used by fromLFunc.
+    */
     double fromLFuncEW(double& x) 
     {
         if (x > beta) 
@@ -291,19 +294,20 @@ private:
         }
     }
 
-    /**\brief Delinearization.
-      *       see ColorSpace.pdf for details.
-      *\return cv::Mat.
-      */
+    /* *\ brief Delinearization.
+       *        see ColorSpace.pdf for details.
+       *\ param rgbl the input array, type of cv::Mat.
+       *\ return the output array, type of cv::Mat.
+    */
     cv::Mat fromLFunc(cv::Mat& rgbl) 
     {
         return elementWise(rgbl, [this](double a)->double {return fromLFuncEW(a); });
     }
 };
 
-/**\brief sRGB color space.
-  *       data from https://en.wikipedia.org/wiki/SRGB.
-  */
+/* *\ brief sRGB color space.
+   *        data from https://en.wikipedia.org/wiki/SRGB.
+*/
 class sRGB_ :public sRGBBase_ 
 {
 public:
@@ -323,8 +327,8 @@ private:
     }
 };
 
-/**\brief Adobe RGB color space.
-  */
+/* *\ brief Adobe RGB color space.
+*/
 class AdobeRGB_ : public AdobeRGBBase_ 
 {
 public:
@@ -343,9 +347,9 @@ private:
     }
 };
 
-/**\brief Wide-gamut RGB color space.
-  *       data from https://en.wikipedia.org/wiki/Wide-gamut_RGB_color_space.
-  */
+/* *\ brief Wide-gamut RGB color space.
+   *        data from https://en.wikipedia.org/wiki/Wide-gamut_RGB_color_space.
+*/
 class WideGamutRGB_ : public AdobeRGBBase_ 
 {
 public:
@@ -364,9 +368,9 @@ private:
     }
 };
 
-/**\brief ProPhoto RGB color space.
-  *       data from https://en.wikipedia.org/wiki/ProPhoto_RGB_color_space.
-  */
+/* *\ brief ProPhoto RGB color space.
+   *        data from https://en.wikipedia.org/wiki/ProPhoto_RGB_color_space.
+*/
 class ProPhotoRGB_ : public AdobeRGBBase_ 
 {
 public:
@@ -385,9 +389,9 @@ private:
     }
 };
 
-/**\brief DCI-P3 RGB color space.
-  *       data from https://en.wikipedia.org/wiki/DCI-P3.
-  */
+/* *\ brief DCI-P3 RGB color space.
+   *        data from https://en.wikipedia.org/wiki/DCI-P3.
+*/
 class DCI_P3_RGB_ : public AdobeRGBBase_ 
 {
 public:
@@ -406,9 +410,9 @@ private:
     }
 };
 
-/**\brief Apple RGB color space.
-  *       data from http://www.brucelindbloom.com/index.html?WorkingSpaceInfo.html.
-  */
+/* *\ brief Apple RGB color space.
+   *        data from http://www.brucelindbloom.com/index.html?WorkingSpaceInfo.html.
+*/
 class AppleRGB_ : public AdobeRGBBase_ 
 {
 public:
@@ -427,9 +431,9 @@ private:
     }
 };
 
-/**\brief REC_709 RGB color space.
-  *       data from https://en.wikipedia.org/wiki/Rec._709.
-  */
+/* *\ brief REC_709 RGB color space.
+   *        data from https://en.wikipedia.org/wiki/Rec._709.
+*/
 class REC_709_RGB_ : public sRGBBase_ 
 {
 public:
@@ -449,9 +453,9 @@ private:
     }
 };
 
-/**\brief REC_2020 RGB color space.
-  *       data from https://en.wikipedia.org/wiki/Rec._2020.
-  */
+/* *\ brief REC_2020 RGB color space.
+   *        data from https://en.wikipedia.org/wiki/Rec._2020.
+*/
 class REC_2020_RGB_ : public sRGBBase_ 
 {
 public:
@@ -481,8 +485,8 @@ AppleRGB_ AppleRGB(false), AppleRGBL(true);
 REC_709_RGB_ REC_709_RGB(false), REC_709_RGBL(true);
 REC_2020_RGB_ REC_2020_RGB(false), REC_2020_RGBL(true);
 
-/**\brief Bind RGB with RGBL.
-  */
+/* *\ brief Bind RGB with RGBL.
+*/
 class ColorSpaceInitial 
 {
 public:
@@ -503,8 +507,8 @@ public:
 ColorSpaceInitial color_space_initial;
 
 
-/**\brief Enum of the possible types of CAMs.
-  */
+/* *\ brief Enum of the possible types of CAMs.
+*/
 enum CAM 
 {
     IDENTITY,
@@ -521,9 +525,9 @@ const static std::map <CAM, std::vector< cv::Mat >> MAs = {
     {BRADFORD, { Bradford ,Bradford.inv() }}
 };
 
-/**\brief XYZ color space.
-  * Chromatic adaption matrices.
-  */
+/* *\ brief XYZ color space.
+   *        Chromatic adaption matrices.
+*/
 class XYZ :public ColorSpace 
 {
 public:
@@ -534,9 +538,12 @@ public:
     }
 
 private:
-    /**\brief Get cam.
-      *\return cv::Mat.
-      */
+    /* *\ brief Get cam.
+       *\ param sio the input IO of src.
+       *\ param dio the input IO of dst.
+       *\ param method type of CAM.
+       *\ return the output array, type of cv::Mat.
+    */
     cv::Mat cam_(IO sio, IO dio, CAM method = BRADFORD) const 
     {
         if (sio == dio) 
@@ -554,21 +561,20 @@ private:
         cv::Mat MA = MAs.at(method)[0];
         cv::Mat MA_inv = MAs.at(method)[1];
         cv::Mat M = MA_inv * cv::Mat::diag((MA * XYZws) / (MA * XYZWd)) * MA;
-
         cams[std::make_tuple(dio, sio, method)] = M;
         cams[std::make_tuple(sio, dio, method)] = M.inv();
         return M;
     }
 };
 
-/**\brief Define XYZ_D65_2 and XYZ_D50_2.
-  */
+/* *\ brief Define XYZ_D65_2 and XYZ_D50_2.
+*/
 const XYZ XYZ_D65_2(D65_2);
 const XYZ XYZ_D50_2(D50_2);
 
 
-/**\brief Lab color space.
-  */
+/* *\ brief Lab color space.
+*/
 class Lab :public ColorSpace 
 {
 public:
@@ -592,8 +598,10 @@ private:
         return { 116. * fy - 16. ,500 * (fx - fy),200 * (fy - fz) };
     }
 
-    /**\brief Calculate From.
-      */
+    /* *\ brief Calculate From.
+       *\ param src the input array, type of cv::Mat.
+       *\ return the output array, type of cv::Mat
+    */
     cv::Mat fromsrc(cv::Mat& src) 
     {
         return channelWise(src, [this](cv::Vec3d a)->cv::Vec3d {return fromxyz(a); });
@@ -606,16 +614,18 @@ private:
         return { illuminants.find(io)->second[0] * f_inv(L + a),illuminants.find(io)->second[1] * f_inv(L),illuminants.find(io)->second[2] * f_inv(L - b) };
     }
 
-    /**\brief Calculate To.
-      */
+    /* *\ brief Calculate To.
+       *\ param src the input array, type of cv::Mat.
+       *\ return the output array, type of cv::Mat
+    */
     cv::Mat tosrc(cv::Mat& src) 
     {
         return channelWise(src, [this](cv::Vec3d a)->cv::Vec3d {return tolab(a); });
     }
 };
 
-/**\brief Define Lab_D65_2 and Lab_D50_2.
-  */
+/* *\ brief Define Lab_D65_2 and Lab_D50_2.
+*/
 const Lab Lab_D65_2(D65_2);
 const Lab Lab_D50_2(D50_2);
 
