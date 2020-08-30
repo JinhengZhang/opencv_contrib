@@ -23,9 +23,6 @@ Or make sure you check the mcc module in the GUI version of CMake: cmake-gui.
 Source Code of the sample
 -----------
 
-
-
-
 Parameters
 
 ```
@@ -55,7 +52,6 @@ ccm_type :
             "CCM_3x3": 3x3 matrix;
             "CCM_4x3": 4x3 matrix;
         type: enum CCM_TYPE;
-        default: CCM_3x3;
 distance :
         the type of color distance;
         Supported list:
@@ -68,7 +64,6 @@ distance :
             "RGB" : Euclidean distance of rgb color space;
             "RGBL" : Euclidean distance of rgbl color space;
         type: enum DISTANCE_TYPE;
-        default: CIE2000;
 linear :
         the method of linearization;
         NOTICE: see Linearization.pdf for details;
@@ -85,26 +80,22 @@ linear :
             "GRAYLOGPOLYFIT": grayscale Logarithmic polynomial fitting;
                             Need assign a value to deg and dst_whites simultaneously;
         type: enum LINEAR_TYPE;
-        default: IDENTITY_;
 gamma :
         the gamma value of gamma correction;
         NOTICE: only valid when linear is set to "gamma";
         type: double;
-        default: 2.2;
 
 deg :
         the degree of linearization polynomial;
         NOTICE: only valid when linear is set to "COLORPOLYFIT", "GRAYPOLYFIT", 
                 "COLORLOGPOLYFIT" and "GRAYLOGPOLYFIT";
         type: int;
-        default: 3;
 saturated_threshold :
         the threshold to determine saturation;
         NOTICE: it is a tuple of [low, up]; 
                 The colors in the closed interval [low, up] are reserved to participate 
                 in the calculation of the loss function and initialization parameters.
         type: std::vector<double>;
-        default: { 0, 0.98 };
 ---------------------------------------------------
 There are some ways to set weights:
     1. set weights_list only;
@@ -114,12 +105,10 @@ see CCM.pdf for details;
 weights_list :
         the list of weight of each color;
         type: cv::Mat;
-        default: empty array;
 
 weights_coeff :
         the exponent number of L* component of the reference color in CIE Lab color space;
         type: double;
-        default: 0;
 ---------------------------------------------------
 initial_method_type :
         the method of calculating CCM initial value;
@@ -127,13 +116,11 @@ initial_method_type :
         Supported list:
             'LEAST_SQUARE': least-squre method;
             'WHITE_BALANCE': white balance method;
-        type: enum INITIAL_METHOD_TYPE;
 
 max_count, epsilon :
         used in MinProblemSolver-DownhillSolver;
         Terminal criteria to the algorithm;
         type: int, double;
-        default: 5000, 1e-4;
 
 
 ---------------------------------------------------
@@ -177,5 +164,87 @@ Supported Color Space:
             D75_10;
             E_2;
             E_10;
+```
+
+## Code
+
+@include mcc/samples/color_correction_model.cpp
+
+## Explanation
+
+-#  **Set header and namespaces**
+
+  @code{.cpp}
+
+\#include <opencv2/core.hpp>
+
+\#include "opencv2/mcc/ccm.hpp"
+
+using namespace cv;
+
+using namespace std;
+
+using namespace ccm;
+
+  @endcode
+
+```  
+If you want you can set the namespace like the code above.
+```
+
+@code{.cpp}
+
+const Mat s = (Mat_<Vec3d>(24, 1) << Vec3d(214.11, 98.67, 37.97), Vec3d(231.94, 153.1, 85.27),  Vec3d(204.08, 143.71, 78.46),  Vec3d(190.58, 122.99, 30.84),  Vec3d(230.93, 148.46, 100.84),  Vec3d(228.64, 206.97, 97.5),  Vec3d(229.09, 137.07, 55.29),  Vec3d(189.21, 111.22, 92.66),  Vec3d(223.5, 96.42, 75.45),  Vec3d(201.82, 69.71, 50.9),  Vec3d(240.52, 196.47, 59.3), Vec3d(235.73, 172.13, 54.),  Vec3d(131.6, 75.04, 68.86),  Vec3d(189.04, 170.43, 42.05),  Vec3d(222.23, 74., 71.95), Vec3d(241.01, 199.1, 61.15),  Vec3d(224.99, 101.4, 100.24),  Vec3d(174.58, 152.63, 91.52),  Vec3d(248.06, 227.69, 140.5), Vec3d(241.15, 201.38, 115.58),  Vec3d(236.49, 175.87, 88.86),  Vec3d(212.19, 133.49, 54.79),  Vec3d(181.17, 102.94, 36.18), Vec3d(115.1, 53.77, 15.23));
+
+  @endcode
+
+```  
+The Color Checker Matrix with the size of 24x1, type of cv::Mat.
+```
+
+@code{.cpp}
+
+ Color color = Macbeth_D65_2;
+
+  std::vector<double> saturated_threshold = { 0, 0.98 };
+
+  cv::Mat weight_list;
+
+  std::string filename = "input1.png";
+
+ @endcode
+
+```
+Some variables for computing ccm Matrix. The variable filename is the path of a picture to be corrected.
+```
+
+@code{.cpp}
+
+ColorCorrectionModel p1(s / 255, color, sRGB, CCM_3x3, CIE2000, GAMMA, 2.2, 3, saturated_threshold, weight_list, 0, LEAST_SQUARE, 5000, 1e-4);
+
+ @endcode
+
+```
+This the object of ColorCorrectionModel class. The parameters should be changed to get the best effect of color correction. See details at the Parameters
+```
+
+@code{.cpp}
+
+ std::cout <<"ccm1"<< p1.ccm << std::endl;
+
+ @endcode
+
+```
+The object p1 has the member variable ccm which means ccm matrix.Then, it will be used to make color correction
+```
+
+@code{.cpp}
+
+Mat img1 = p1.infer_image(filename);
+
+ @endcode
+
+```
+img1 is the result of correction correction.
 ```
 
