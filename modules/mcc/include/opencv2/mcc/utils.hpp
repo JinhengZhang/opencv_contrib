@@ -36,9 +36,14 @@
 
 namespace cv
 {
-namespace ccm
+namespace ccm 
 {
 
+
+/* *\ brief function for elementWise operation
+   *\ param src the input array,type of cv::Mat
+   *\ lambda a for operation 
+*/
 template<typename F>
 cv::Mat elementWise(const cv::Mat& src, F&& lambda)
 {
@@ -74,6 +79,10 @@ cv::Mat elementWise(const cv::Mat& src, F&& lambda)
     return dst;
 }
 
+/* *\ brief function for channel operation
+   *\ param src the input array,type of cv::Mat
+   *\ lambda the function for operation 
+*/
 template<typename F>
 cv::Mat channelWise(const cv::Mat& src, F&& lambda) 
 {
@@ -86,6 +95,11 @@ cv::Mat channelWise(const cv::Mat& src, F&& lambda)
     return dst;
 }
 
+/* *\ brief function for distance operation.
+   *\ param src the input array,type of cv::Mat.
+   *\ param ref another input array,type of cv::Mat.
+   *\ param lambda the computing method for distance .
+*/
 template<typename F>
 cv::Mat distanceWise(cv::Mat& src, cv::Mat& ref, F&& lambda) 
 {
@@ -100,17 +114,25 @@ cv::Mat distanceWise(cv::Mat& src, cv::Mat& ref, F&& lambda)
     return dst;
 }
 
-/* gamma correction; see ColorSpace.pdf for details; */
+
 double gammaCorrection_(const double& element, const double& gamma) 
 {
     return (element >= 0 ? pow(element, gamma) : -pow((-element), gamma));
 }
 
+/* *\ brief gamma correction ,see ColorSpace.pdf for details.
+   *\ param src the input array,type of cv::Mat.
+   *\ param gamma a constant for gamma correction  .
+*/
 cv::Mat gammaCorrection(const cv::Mat& src, const double& gamma) 
 {
     return elementWise(src, [gamma](double element)->double {return gammaCorrection_(element, gamma); });
 }
 
+/* *\ brief maskCopyTo a function to delete unsatisfied elementwise .
+   *\ param src the input array,type of cv::Mat.
+   *\ param mask operation mask that used to choose satisfided elementwise.
+ */
 cv::Mat maskCopyTo(const cv::Mat& src, const cv::Mat& mask) 
 {
     cv::Mat dst(countNonZero(mask), 1, src.type());
@@ -153,6 +175,10 @@ cv::Mat maskCopyTo(const cv::Mat& src, const cv::Mat& mask)
     return dst;
 }
 
+/* *\ brief multiple the function used to compute an array with n channels mulipied by ccm .
+   *\ param src the input array,type of cv::Mat.
+   *\ param ccm the ccm matrix to make color correction 
+*/
 cv::Mat multiple(const cv::Mat& xyz, const cv::Mat& ccm) 
 {
     cv::Mat tmp = xyz.reshape(1, xyz.rows * xyz.cols);
@@ -161,7 +187,12 @@ cv::Mat multiple(const cv::Mat& xyz, const cv::Mat& ccm)
     return res;
 }
 
-/* return the mask of unsaturated colors */
+/* *\ brief multiple the function used to get the mask of saturated colors,
+            colors between low and up will be choosed.
+   *\ param src the input array,type of cv::Mat.
+   *\ param low  the threshold to choose  saturated colors
+   *\ param up  the threshold to choose  saturated colors
+*/
 cv::Mat saturate(cv::Mat& src, const double& low, const double& up) 
 {
     cv::Mat dst = cv::Mat::ones(src.size(), CV_8UC1);
@@ -183,8 +214,10 @@ cv::Mat saturate(cv::Mat& src, const double& low, const double& up)
 
 const static cv::Mat m_gray = (cv::Mat_<double>(3, 1) << 0.2126, 0.7152, 0.0722);
 
-/* it is an approximation grayscale function for relative RGB color space;
-    see Miscellaneous.pdf for details; */
+/**\ brief rgb2gray it is an approximation grayscale function for relative RGB color space,
+ *         see Miscellaneous.pdf for details;
+  *\ param rgb the input array,type of cv::Mat.
+ */
 cv::Mat rgb2gray(cv::Mat rgb) 
 {
     return multiple(rgb, m_gray);
