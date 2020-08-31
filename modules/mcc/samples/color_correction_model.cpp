@@ -39,7 +39,7 @@ int main() {
     Color color = Macbeth_D65_2;
     std::vector<double> saturated_threshold = { 0, 0.98 };
     cv::Mat weight_list;
-    std::string filename = "input1.png";
+    //std::string filename = "input1.png";
 
 
     ColorCorrectionModel p1(s / 255, color, sRGB, CCM_3x3, CIE2000, GAMMA, 2.2, 3,
@@ -67,13 +67,13 @@ int main() {
     //std::cout << "ccm7" << p7.ccm << std::endl;
 
 
-    Mat img1 = p1.infer_image(filename);
-    //Mat img2 = p2.infer_image(filename);
+    //Mat img1 = p1.inferImage(filename);
+    //Mat img2 = p2.inferImage(filename);
     //Mat img3 = p3.inferImage(filename);
-    //Mat img4 = p4.infer_image(filename);
-    //Mat img5 = p5.infer_image(filename, true);
-    //Mat img6 = p6.infer_image(filename);
-    //Mat img7 = p7.infer_image(filename);
+    //Mat img4 = p4.inferImage(filename);
+    //Mat img5 = p5.inferImage(filename, true);
+    //Mat img6 = p6.inferImage(filename);
+    //Mat img7 = p7.inferImage(filename);
 
     return 0;
 
