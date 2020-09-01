@@ -39,6 +39,12 @@ namespace cv
 {
 namespace ccm
 {
+double gammaCorrection_(const double& element, const double& gamma);
+cv::Mat gammaCorrection(const cv::Mat& src, const double& gamma);
+cv::Mat maskCopyTo(const cv::Mat& src, const cv::Mat& mask);
+cv::Mat multiple(const cv::Mat& xyz, const cv::Mat& ccm);
+cv::Mat saturate(cv::Mat& src, const double& low, const double& up);
+cv::Mat rgb2gray(cv::Mat rgb);
 
 /* *\ brief function for elementWise operation
    *\ param src the input array, type of cv::Mat
